@@ -18,9 +18,9 @@ namespace NeighborGoodAPI.Models
         public ICollection<Item> Items { get; set; } = new List<Item>();
         public double? Rating { get; set; }
         public ICollection<Comment> Comments { get; set; } = new List<Comment>();
-        [Precision(8, 6)]
-        public decimal Longitude { get; set; }
-        [Precision(8, 6)]
-        public decimal Latitude { get; set; }
+        //[Precision(8, 6)]
+        //public decimal Longitude { get; set; }
+        //[Precision(8, 6)]
+        //public decimal Latitude { get; set; }
     }
 }

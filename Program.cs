@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using NeighborGoodAPI.Models;
+using System.Text.Json.Serialization;
 
 namespace NeighborGoodAPI
 {
@@ -19,7 +20,11 @@ namespace NeighborGoodAPI
                                       policy.WithOrigins(builder.Configuration.GetValue<string>("Front"));
                                   });
             });
-            builder.Services.AddControllers();
+            //builder.Services.AddControllers();
+            builder.Services.AddControllers()
+                            .AddJsonOptions(x =>
+                                x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
+
             builder.Services.AddDbContext<NGDbContext>(options =>
                 {
                     options.UseSqlServer(builder.Configuration.GetConnectionString("DbConnection"));
