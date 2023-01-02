@@ -1,14 +1,30 @@
+using Microsoft.EntityFrameworkCore;
+using NeighborGoodAPI.Models;
+
 namespace NeighborGoodAPI
 {
     public class Program
     {
         public static void Main(string[] args)
         {
+            string corsPolicyName = "_origins";
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy(name: corsPolicyName,
+                                  policy =>
+                                  {
+                                      policy.WithOrigins(builder.Configuration.GetValue<string>("Front"));
+                                  });
+            });
             builder.Services.AddControllers();
+            builder.Services.AddDbContext<NGDbContext>(options =>
+                {
+                    options.UseSqlServer(builder.Configuration.GetConnectionString("DbConnection"));
+                });
+
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
@@ -24,8 +40,9 @@ namespace NeighborGoodAPI
 
             app.UseHttpsRedirection();
 
-            app.UseAuthorization();
+            app.UseCors(corsPolicyName);
 
+            app.UseAuthorization();
 
             app.MapControllers();
 

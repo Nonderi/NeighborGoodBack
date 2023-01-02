@@ -5,8 +5,9 @@ namespace NeighborGoodAPI.Models
     public class Comment
     {
         public int Id { get; set; }
-        public string Text { get; set; }
         [Required]
-        public Profile UserProfile { get; set; }
+        public string Text { get; set; } = null!;
+        [Required]
+        public Profile UserProfile { get; set; } = null!;
     }
 }

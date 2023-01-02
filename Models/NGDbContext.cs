@@ -4,17 +4,15 @@ namespace NeighborGoodAPI.Models
 {
     public class NGDbContext : DbContext
     {
-        public NGDbContext(DbContextOptions<NGDbContext> options) : base(options)
-        {
-        }
+        public NGDbContext(DbContextOptions<NGDbContext> options) : base(options) { }
 
-        public DbSet<Profile> Profiles { get; set; }
-        public DbSet<Good> Goods { get; set; }
-        public DbSet<Comment> Comments { get; set; }
+        public DbSet<Profile> Profiles { get; set; } = null!;
+        public DbSet<Item> Items { get; set; } = null!;
+        public DbSet<Comment> Comments { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Good>().Ignore("File");
+            modelBuilder.Entity<Item>().Ignore("File");
         }
     }
 }
