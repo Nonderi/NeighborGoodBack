@@ -30,7 +30,7 @@ namespace NeighborGoodAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Item>>> GetItems()
         {
-            return await _context.Items.ToListAsync();
+            return await _context.Items.Include(i => i.Owner).ToListAsync();
         }
 
         // GET: api/Items/5
@@ -76,29 +76,6 @@ namespace NeighborGoodAPI.Controllers
             }
 
             return NoContent();
-        }
-
-        // testausta varten, swaggerilla voi kokeilla että kuva menee Azureen
-        [HttpPost("dummy")]
-        public async Task<ActionResult<Item>> PostDummyItem(IFormFile file)
-        {
-            string fileName = $"{Guid.NewGuid()}_{file.FileName}";
-            //Item item = new()
-            //{
-            //    Name = "Dummy name",
-            //    Description = "Dummy description",
-            //    Category = "Vasara"
-            //};
-            if (!await UploadImageToAzureAsync(file, fileName))
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError,
-                        new { message = "Failed to upload image to Azure :(" });
-            }
-            return NoContent();
-            //_context.Items.Add(item);
-            //await _context.SaveChangesAsync();
-
-            //return CreatedAtAction("GetItem", new { id = item.Id }, item);
         }
 
         // POST: api/Items
