@@ -12,7 +12,7 @@ namespace NeighborGoodAPI.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Item>().Ignore("File");
+            modelBuilder.Entity<Item>().Ignore("ImageFile");
         }
     }
 }
