@@ -10,7 +10,7 @@ namespace NeighborGoodAPI.Models
         [Required]
         public string Name { get; set; } = null!;
         public string? Description { get; set; }
-        public string? Category { get; set; }
+        public ItemCategory? Category { get; set; }
         public bool isBorrowed { get; set; }
         public double? Rating { get; set; }
         public int BorrowedCount { get; set; }

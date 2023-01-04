@@ -27,18 +27,18 @@ namespace NeighborGoodAPI.Controllers
             return await _context.Profiles.ToListAsync();
         }
 
-        // GET: api/Profiles/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Profile>> GetProfile(int id)
+        // GET: api/Profiles/<userId>
+        [HttpGet("{userId}")]
+        public async Task<ActionResult<Profile?>> GetProfile(string userId)
         {
-            var profile = await _context.Profiles.FindAsync(id);
+            return await _context.Profiles.SingleOrDefaultAsync(p => p.Auth0Id.Equals(userId));
 
-            if (profile == null)
-            {
-                return NotFound();
-            }
+            //if (profile == null)
+            //{
+            //    return NotFound("Profile doesn't exist");
+            //}
 
-            return profile;
+            //return profile;
         }
 
         // PUT: api/Profiles/5
