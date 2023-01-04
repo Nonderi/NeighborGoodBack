@@ -101,11 +101,12 @@ namespace NeighborGoodAPI.Controllers
         {
             var file = formData.Files.FirstOrDefault();
             string? fileName = null;
-
+            string? fileUrl = null;
             if (file != null && IsImage(file))
             {
                 fileName = $"{Guid.NewGuid()}_{file.FileName}";
-                if (!(await UploadImageToAzureAsync(file, fileName)))
+                fileUrl = await UploadImageToAzureAsync(file, fileName);
+                if (fileUrl == null)
                 {
                     return StatusCode(StatusCodes.Status500InternalServerError,
                         new { message = "Failed to upload image to Azure :(" });
@@ -136,7 +137,7 @@ namespace NeighborGoodAPI.Controllers
                 Name = itemName,
                 Owner = owner,
                 Description = description,
-                ImageName = fileName
+                ImageUrl = fileUrl
             };
 
             _context.Items.Add(item);
@@ -182,7 +183,7 @@ namespace NeighborGoodAPI.Controllers
             return _context.Items.Any(e => e.Id == id);
         }
 
-        private async Task<bool> UploadImageToAzureAsync(IFormFile file, string imageName)
+        private async Task<string?> UploadImageToAzureAsync(IFormFile file, string imageName)
         {
             try
             {
@@ -196,7 +197,7 @@ namespace NeighborGoodAPI.Controllers
                     var response = await blobClient.UploadAsync(data, new BlobUploadOptions { HttpHeaders = new BlobHttpHeaders { ContentType = file.ContentType } });
                     if (response.GetRawResponse().IsError)
                     {
-                        return false;
+                        return null;
                     }
                 }
                 BlobHttpHeaders headers = new()
@@ -204,13 +205,14 @@ namespace NeighborGoodAPI.Controllers
                     ContentType = file.ContentType
                 };
                 blobClient.SetHttpHeaders(headers);
+                return blobClient.Uri.ToString();
             }
             catch (RequestFailedException ex)
             {
                 System.Diagnostics.Debug.WriteLine(ex.Message);
-                return false;
+                return null;
             }
-            return true;
+            
         }
     }
 }

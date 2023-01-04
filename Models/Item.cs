@@ -14,7 +14,7 @@ namespace NeighborGoodAPI.Models
         public bool isBorrowed { get; set; }
         public double? Rating { get; set; }
         public int BorrowedCount { get; set; }
-        public string? ImageName { get; set; }
+        public string? ImageUrl { get; set; }
         public IFormFile? ImageFile { get; set; }
         public ICollection<Comment> Comments { get; set; } = new List<Comment>();
     }
