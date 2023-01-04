@@ -42,7 +42,7 @@ namespace NeighborGoodAPI.Controllers
         }
 
         // GET: api/items: search
-        [HttpGet("/searchExtended{name}")]
+        [HttpGet("/searchExtended/{name}")]
         public async Task<ActionResult<List<Item>>> GetItemExtended(string? name, string? city, string? category)
         {
             return await _context.Items.Include(t => t.Owner).ThenInclude(p => p.Address)
