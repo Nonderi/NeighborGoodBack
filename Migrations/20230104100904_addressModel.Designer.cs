@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NeighborGoodAPI.Models;
 
@@ -11,9 +12,10 @@ using NeighborGoodAPI.Models;
 namespace NeighborGoodAPI.Migrations
 {
     [DbContext(typeof(NGDbContext))]
-    partial class NGDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230104100904_addressModel")]
+    partial class addressModel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -48,34 +50,6 @@ namespace NeighborGoodAPI.Migrations
                         .IsUnique();
 
                     b.ToTable("Address");
-                });
-
-            modelBuilder.Entity("NeighborGoodAPI.Models.Address", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<string>("City")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("ProfileId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Street")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ZipCode")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProfileId")
-                        .IsUnique();
-
-                    b.ToTable("Addresses");
                 });
 
             modelBuilder.Entity("NeighborGoodAPI.Models.Comment", b =>
@@ -116,13 +90,13 @@ namespace NeighborGoodAPI.Migrations
                     b.Property<int>("BorrowedCount")
                         .HasColumnType("int");
 
-                    b.Property<int?>("CategoryId")
-                        .HasColumnType("int");
+                    b.Property<string>("Category")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("ImageUrl")
+                    b.Property<string>("ImageName")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
@@ -140,28 +114,9 @@ namespace NeighborGoodAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CategoryId");
-
                     b.HasIndex("OwnerId");
 
                     b.ToTable("Items");
-                });
-
-            modelBuilder.Entity("NeighborGoodAPI.Models.ItemCategory", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("ItemCategory");
                 });
 
             modelBuilder.Entity("NeighborGoodAPI.Models.Profile", b =>
@@ -216,17 +171,11 @@ namespace NeighborGoodAPI.Migrations
 
             modelBuilder.Entity("NeighborGoodAPI.Models.Item", b =>
                 {
-                    b.HasOne("NeighborGoodAPI.Models.ItemCategory", "Category")
-                        .WithMany()
-                        .HasForeignKey("CategoryId");
-
                     b.HasOne("NeighborGoodAPI.Models.Profile", "Owner")
                         .WithMany("Items")
                         .HasForeignKey("OwnerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Category");
 
                     b.Navigation("Owner");
                 });

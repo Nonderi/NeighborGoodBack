@@ -33,6 +33,22 @@ namespace NeighborGoodAPI.Controllers
             return await _context.Items.Include(i => i.Owner).ToListAsync();
         }
 
+        // GET: api/items: search
+        [HttpGet("/searchByName/{name}")]
+        public async Task<ActionResult<List<Item>>> GetItemByName(string name)
+        {
+            return await _context.Items.Include(t => t.Owner).ThenInclude(p => p.Address)
+                .Where(t => t.Name.Contains(name)).ToListAsync();
+        }
+
+        // GET: api/items: search
+        [HttpGet("/searchExtended/{name}")]
+        public async Task<ActionResult<List<Item>>> GetItemExtended(string? name, string? city, string? category)
+        {
+            return await _context.Items.Include(t => t.Owner).ThenInclude(p => p.Address)
+                .Where(t => t.Name.Contains(name) && t.Owner.Address.City == city && t.Category == category).ToListAsync();
+        }
+
         // GET: api/Items/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Item>> GetItem(int id)
