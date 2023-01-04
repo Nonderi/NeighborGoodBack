@@ -12,7 +12,7 @@ namespace NeighborGoodAPI.Models
         [Required]
         public string Auth0Id { get; set; } = null!;
         [Required]
-        public string Address { get; set; } = null!;
+        public Address Address { get; set; } = null!;
         [Required]
         public string PhoneNumber { get; set; } = null!;
         public ICollection<Item> Items { get; set; } = new List<Item>();
