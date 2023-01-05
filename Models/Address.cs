@@ -1,12 +1,15 @@
-﻿namespace NeighborGoodAPI.Models
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+
+namespace NeighborGoodAPI.Models
 {
     public class Address
     {
         public int Id { get; set; }
-        public string? Street { get; set; }
-        public string? City { get; set; }
-        public string? ZipCode { get; set; }
+        public string Street { get; set; } = null!;
+        public string City { get; set; } = null!;
+        public string ZipCode { get; set; } = null!;
         public int ProfileId { get; set; }
-        public Profile User { get; set; }
+        [ValidateNever]
+        public Profile Profile { get; set; }
     }
 }

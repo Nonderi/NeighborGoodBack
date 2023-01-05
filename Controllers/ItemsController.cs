@@ -37,7 +37,7 @@ namespace NeighborGoodAPI.Controllers
         [HttpGet("/searchByName/{name}")]
         public async Task<ActionResult<List<Item>>> GetItemByName(string name)
         {
-            return await _context.Items.Include(t => t.Owner).ThenInclude(p => p.Address)
+            return await _context.Items.Include(i => i.Category).Include(t => t.Owner)
                 .Where(t => t.Name.Contains(name)).ToListAsync();
         }
 
@@ -45,8 +45,8 @@ namespace NeighborGoodAPI.Controllers
         [HttpGet("/searchExtended/{name}")]
         public async Task<ActionResult<List<Item>>> GetItemExtended(string? name, string? city, string? category)
         {
-            return await _context.Items.Include(t => t.Owner).ThenInclude(p => p.Address)
-                .Where(t => t.Name.Contains(name) && t.Owner.Address.City == city && t.Category == category).ToListAsync();
+            return await _context.Items.Include(i => i.Category).Include(t => t.Owner)
+                .Where(t => t.Name.Contains(name) && t.Owner.City == city && t.Category.Name == category).ToListAsync();
         }
 
         // GET: api/Items/5
@@ -111,7 +111,6 @@ namespace NeighborGoodAPI.Controllers
                     return StatusCode(StatusCodes.Status500InternalServerError,
                         new { message = "Failed to upload image to Azure :(" });
                 }
-
             }
 
             var itemName = formData["itemName"].FirstOrDefault();

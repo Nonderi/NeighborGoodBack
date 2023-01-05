@@ -22,62 +22,6 @@ namespace NeighborGoodAPI.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
 
-            modelBuilder.Entity("NeighborGoodAPI.Models.Address", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<string>("City")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("ProfileId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Street")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ZipCode")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProfileId")
-                        .IsUnique();
-
-                    b.ToTable("Address");
-                });
-
-            modelBuilder.Entity("NeighborGoodAPI.Models.Address", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<string>("City")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("ProfileId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Street")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ZipCode")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProfileId")
-                        .IsUnique();
-
-                    b.ToTable("Addresses");
-                });
-
             modelBuilder.Entity("NeighborGoodAPI.Models.Comment", b =>
                 {
                     b.Property<int>("Id")
@@ -86,21 +30,16 @@ namespace NeighborGoodAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<int?>("ItemId")
+                    b.Property<int>("ItemId")
                         .HasColumnType("int");
 
                     b.Property<string>("Text")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("UserProfileId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("ItemId");
-
-                    b.HasIndex("UserProfileId");
 
                     b.ToTable("Comments");
                 });
@@ -161,7 +100,7 @@ namespace NeighborGoodAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ItemCategory");
+                    b.ToTable("ItemCategories");
                 });
 
             modelBuilder.Entity("NeighborGoodAPI.Models.Profile", b =>
@@ -176,42 +115,44 @@ namespace NeighborGoodAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("PhoneNumber")
+                    b.Property<string>("City")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<double?>("Rating")
-                        .HasColumnType("float");
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Phone")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Street")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ZipCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
                     b.ToTable("Profiles");
                 });
 
-            modelBuilder.Entity("NeighborGoodAPI.Models.Address", b =>
-                {
-                    b.HasOne("NeighborGoodAPI.Models.Profile", "User")
-                        .WithOne("Address")
-                        .HasForeignKey("NeighborGoodAPI.Models.Address", "ProfileId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("NeighborGoodAPI.Models.Comment", b =>
                 {
-                    b.HasOne("NeighborGoodAPI.Models.Item", null)
+                    b.HasOne("NeighborGoodAPI.Models.Item", "Item")
                         .WithMany("Comments")
-                        .HasForeignKey("ItemId");
-
-                    b.HasOne("NeighborGoodAPI.Models.Profile", "UserProfile")
-                        .WithMany("Comments")
-                        .HasForeignKey("UserProfileId")
+                        .HasForeignKey("ItemId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("UserProfile");
+                    b.Navigation("Item");
                 });
 
             modelBuilder.Entity("NeighborGoodAPI.Models.Item", b =>
@@ -238,11 +179,6 @@ namespace NeighborGoodAPI.Migrations
 
             modelBuilder.Entity("NeighborGoodAPI.Models.Profile", b =>
                 {
-                    b.Navigation("Address")
-                        .IsRequired();
-
-                    b.Navigation("Comments");
-
                     b.Navigation("Items");
                 });
 #pragma warning restore 612, 618

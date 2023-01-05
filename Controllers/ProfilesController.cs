@@ -27,18 +27,24 @@ namespace NeighborGoodAPI.Controllers
             return await _context.Profiles.ToListAsync();
         }
 
-        // GET: api/Profiles/<userId>
-        [HttpGet("{userId}")]
-        public async Task<ActionResult<Profile?>> GetProfile(string userId)
+        [HttpGet("userByAuthId/{userId}")]
+        public async Task<Profile?> GetProfileByAuthId(string userid)
         {
-            return await _context.Profiles.SingleOrDefaultAsync(p => p.Auth0Id.Equals(userId));
+            return  await _context.Profiles.SingleOrDefaultAsync(p => p.Auth0Id.Equals(userid));
+        }
 
-            //if (profile == null)
-            //{
-            //    return NotFound("Profile doesn't exist");
-            //}
+        // GET: api/Profiles/<userId>
+        [HttpGet("{Id}")]
+        public async Task<ActionResult<Profile?>> GetProfile(string id)
+        {
+            var profile=  await _context.Profiles.FindAsync(id);
 
-            //return profile;
+            if (profile == null)
+            {
+                return NotFound("Profile doesn't exist");
+            }
+
+            return profile;
         }
 
         // PUT: api/Profiles/5
@@ -77,10 +83,20 @@ namespace NeighborGoodAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<Profile>> PostProfile(Profile profile)
         {
-            _context.Profiles.Add(profile);
-            await _context.SaveChangesAsync();
+            Profile newProfile = new()
+            {
+                Auth0Id = profile.Auth0Id,
+                FirstName = profile.FirstName,
+                LastName = profile.LastName,
+                Phone = profile.Phone,
+                Street = profile.Street,
+                City = profile.City,
+                ZipCode = profile.ZipCode,
+            };
 
-            return CreatedAtAction("GetProfile", new { id = profile.Id }, profile);
+            _context.Profiles.Add(newProfile);
+            await _context.SaveChangesAsync();
+            return CreatedAtAction("GetProfile", new { id = newProfile.Id }, newProfile);
         }
 
 

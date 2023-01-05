@@ -17,7 +17,8 @@ namespace NeighborGoodAPI
                 options.AddPolicy(name: corsPolicyName,
                                   policy =>
                                   {
-                                      policy.WithOrigins(builder.Configuration.GetValue<string>("Front"));
+                                      policy.WithOrigins(builder.Configuration.GetValue<string>("Front"))
+                                      .AllowAnyHeader();
                                   });
             });
             //builder.Services.AddControllers();

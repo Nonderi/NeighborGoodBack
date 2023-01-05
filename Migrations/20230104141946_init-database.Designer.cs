@@ -12,7 +12,7 @@ using NeighborGoodAPI.Models;
 namespace NeighborGoodAPI.Migrations
 {
     [DbContext(typeof(NGDbContext))]
-    [Migration("20230102081618_init-database")]
+    [Migration("20230104141946_init-database")]
     partial class initdatabase
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -32,16 +32,16 @@ namespace NeighborGoodAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
+                    b.Property<int>("ItemId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Text")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("UserProfileId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("UserProfileId");
+                    b.HasIndex("ItemId");
 
                     b.ToTable("Comments");
                 });
@@ -57,33 +57,52 @@ namespace NeighborGoodAPI.Migrations
                     b.Property<int>("BorrowedCount")
                         .HasColumnType("int");
 
-                    b.Property<string>("Category")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("CategoryId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("ImageName")
+                    b.Property<string>("ImageUrl")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("OwnerId")
+                        .HasColumnType("int");
+
                     b.Property<double?>("Rating")
                         .HasColumnType("float");
-
-                    b.Property<int>("UserProfileId")
-                        .HasColumnType("int");
 
                     b.Property<bool>("isBorrowed")
                         .HasColumnType("bit");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserProfileId");
+                    b.HasIndex("CategoryId");
+
+                    b.HasIndex("OwnerId");
 
                     b.ToTable("Items");
+                });
+
+            modelBuilder.Entity("NeighborGoodAPI.Models.ItemCategory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ItemCategories");
                 });
 
             modelBuilder.Entity("NeighborGoodAPI.Models.Profile", b =>
@@ -94,24 +113,33 @@ namespace NeighborGoodAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<string>("Address")
+                    b.Property<string>("Auth0Id")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal>("Latitude")
-                        .HasPrecision(8, 6)
-                        .HasColumnType("decimal(8,6)");
-
-                    b.Property<decimal>("Longitude")
-                        .HasPrecision(8, 6)
-                        .HasColumnType("decimal(8,6)");
-
-                    b.Property<string>("PhoneNumber")
+                    b.Property<string>("City")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<double?>("Rating")
-                        .HasColumnType("float");
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Phone")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Street")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ZipCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -120,30 +148,39 @@ namespace NeighborGoodAPI.Migrations
 
             modelBuilder.Entity("NeighborGoodAPI.Models.Comment", b =>
                 {
-                    b.HasOne("NeighborGoodAPI.Models.Profile", "UserProfile")
+                    b.HasOne("NeighborGoodAPI.Models.Item", "Item")
                         .WithMany("Comments")
-                        .HasForeignKey("UserProfileId")
+                        .HasForeignKey("ItemId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("UserProfile");
+                    b.Navigation("Item");
                 });
 
             modelBuilder.Entity("NeighborGoodAPI.Models.Item", b =>
                 {
-                    b.HasOne("NeighborGoodAPI.Models.Profile", "UserProfile")
+                    b.HasOne("NeighborGoodAPI.Models.ItemCategory", "Category")
+                        .WithMany()
+                        .HasForeignKey("CategoryId");
+
+                    b.HasOne("NeighborGoodAPI.Models.Profile", "Owner")
                         .WithMany("Items")
-                        .HasForeignKey("UserProfileId")
+                        .HasForeignKey("OwnerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("UserProfile");
+                    b.Navigation("Category");
+
+                    b.Navigation("Owner");
+                });
+
+            modelBuilder.Entity("NeighborGoodAPI.Models.Item", b =>
+                {
+                    b.Navigation("Comments");
                 });
 
             modelBuilder.Entity("NeighborGoodAPI.Models.Profile", b =>
                 {
-                    b.Navigation("Comments");
-
                     b.Navigation("Items");
                 });
 #pragma warning restore 612, 618
