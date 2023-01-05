@@ -83,17 +83,22 @@ namespace NeighborGoodAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<Profile>> PostProfile(Profile profile)
         {
+            Address address = new Address()
+            {
+                Street = profile.Address.Street,
+                City = profile.Address.City,
+                ZipCode = profile.Address.ZipCode,
+            };
+
             Profile newProfile = new()
             {
                 Auth0Id = profile.Auth0Id,
                 FirstName = profile.FirstName,
                 LastName = profile.LastName,
                 Phone = profile.Phone,
-                Street = profile.Street,
-                City = profile.City,
-                ZipCode = profile.ZipCode,
+                Address = address 
             };
-
+            
             _context.Profiles.Add(newProfile);
             await _context.SaveChangesAsync();
             return CreatedAtAction("GetProfile", new { id = newProfile.Id }, newProfile);
