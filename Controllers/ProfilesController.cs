@@ -28,16 +28,16 @@ namespace NeighborGoodAPI.Controllers
         }
 
         [HttpGet("userByAuthId/{userId}")]
-        public async Task<Profile?> GetProfileByAuthId(string userid)
+        public async Task<Profile?> GetProfileByAuthId(string userId)
         {
-            return  await _context.Profiles.SingleOrDefaultAsync(p => p.Auth0Id.Equals(userid));
+            return  await _context.Profiles.Include(p => p.Items).SingleOrDefaultAsync(p => p.Auth0Id.Equals(userId));
         }
 
         // GET: api/Profiles/<userId>
-        [HttpGet("{Id}")]
-        public async Task<ActionResult<Profile?>> GetProfile(string id)
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Profile?>> GetProfile(int id)
         {
-            var profile=  await _context.Profiles.FindAsync(id);
+            var profile=  await _context.Profiles.Include(p => p.Items).SingleOrDefaultAsync(p => p.Id == id);
 
             if (profile == null)
             {
