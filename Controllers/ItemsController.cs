@@ -46,7 +46,9 @@ namespace NeighborGoodAPI.Controllers
         public async Task<ActionResult<List<Item>>> GetItemExtended(string? name, string? city, string? category)
         {
             return await _context.Items.Include(i => i.Category).Include(t => t.Owner).ThenInclude(p => p.Address)
-                .Where(t => t.Name.Contains(name) && t.Owner.Address.City == city && t.Category.Name == category).ToListAsync();
+                .Where(t => (name == null ? true : t.Name.Contains(name))
+                             && (city == null ? true : t.Owner.Address.City.Contains(city))
+                             && (category == null ? true : t.Category.Name.Equals(category))).ToListAsync();
         }
 
         // GET: api/Items/5
