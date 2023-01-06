@@ -51,6 +51,20 @@ namespace NeighborGoodAPI.Controllers
                              && (category == null ? true : t.Category.Name.Equals(category))).ToListAsync();
         }
 
+        //GET: api/Items/Cities
+        [HttpGet("Cities")]
+        public async Task<List<string>> GetCities()
+        {
+            return await _context.Addresses.Select(a => a.City).ToListAsync();
+        }
+
+        //GET: api/Items/Categories
+        [HttpGet("Categories")]
+        public async Task<List<string>> GetItemCategories()
+        {
+            return await _context.ItemCategories.Select(ic => ic.Name).ToListAsync();
+        }
+
         // GET: api/Items/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Item>> GetItem(int id)
