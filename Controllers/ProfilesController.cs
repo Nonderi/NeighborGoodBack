@@ -10,6 +10,8 @@ using NeighborGoodAPI.Models;
 using Service;
 using System.IO;
 using System.Reflection.Emit;
+using Service.Models;
+using System.Text.Json;
 
 namespace NeighborGoodAPI.Controllers
 {
@@ -99,12 +101,18 @@ namespace NeighborGoodAPI.Controllers
                 ZipCode = zipCode
             };
 
-            LocationService locObj = new(_configuration.GetValue<string>("GoogleMapsApiKey"));
-            (double lat, double lng)? loc = await locObj.GetLatitudeLongitudeAsync(street, city, zipCode);
+            LocationService locService = new(_configuration.GetValue<string>("GoogleMapsApiKey"));
+            LocationObject? locObj = await locService.GetLocationObject(street, city, zipCode);
 
-            if (loc == null)
+            if (locObj == null)
             {
                 return NotFound("Paikkatietojen haku epäonnistui");
+            }
+            System.Diagnostics.Debug.WriteLine(JsonSerializer.Serialize(locObj));
+
+            if (locObj.status != "OK")
+            {
+                return NotFound("Osoitetta ei löytynyt");
             }
 
             Profile newProfile = new()
@@ -114,11 +122,9 @@ namespace NeighborGoodAPI.Controllers
                 LastName = profile.LastName,
                 Phone = profile.Phone,
                 Address = address,
-                Latitude = loc.Value.lat,
-                Longitude = loc.Value.lng
+                Latitude = locObj.results[0].geometry.location.lat,
+                Longitude = locObj.results[0].geometry.location.lng
             };
-
-
 
             _context.Profiles.Add(newProfile);
             await _context.SaveChangesAsync();
