@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NeighborGoodAPI.Models;
 
@@ -11,9 +12,10 @@ using NeighborGoodAPI.Models;
 namespace NeighborGoodAPI.Migrations
 {
     [DbContext(typeof(NGDbContext))]
-    partial class NGDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230105093434_profile-location")]
+    partial class profilelocation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -44,7 +46,7 @@ namespace NeighborGoodAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Addresses");
+                    b.ToTable("Address");
                 });
 
             modelBuilder.Entity("NeighborGoodAPI.Models.Comment", b =>
@@ -77,12 +79,6 @@ namespace NeighborGoodAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<string>("AddInfo")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("BorrowTime")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int>("BorrowedCount")
                         .HasColumnType("int");
 
@@ -94,9 +90,6 @@ namespace NeighborGoodAPI.Migrations
 
                     b.Property<string>("ImageUrl")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("ItemAdded")
-                        .HasColumnType("datetime2");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -137,6 +130,25 @@ namespace NeighborGoodAPI.Migrations
                     b.ToTable("ItemCategories");
                 });
 
+            modelBuilder.Entity("NeighborGoodAPI.Models.Location", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<double>("Latitude")
+                        .HasColumnType("float");
+
+                    b.Property<double>("Longitude")
+                        .HasColumnType("float");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Location");
+                });
+
             modelBuilder.Entity("NeighborGoodAPI.Models.Profile", b =>
                 {
                     b.Property<int>("Id")
@@ -160,11 +172,8 @@ namespace NeighborGoodAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<double>("Latitude")
-                        .HasColumnType("float");
-
-                    b.Property<double>("Longitude")
-                        .HasColumnType("float");
+                    b.Property<int>("LocationId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Phone")
                         .IsRequired()
@@ -173,6 +182,8 @@ namespace NeighborGoodAPI.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AddressId");
+
+                    b.HasIndex("LocationId");
 
                     b.ToTable("Profiles");
                 });
@@ -213,7 +224,15 @@ namespace NeighborGoodAPI.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("NeighborGoodAPI.Models.Location", "Location")
+                        .WithMany()
+                        .HasForeignKey("LocationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Address");
+
+                    b.Navigation("Location");
                 });
 
             modelBuilder.Entity("NeighborGoodAPI.Models.Item", b =>

@@ -43,7 +43,7 @@ namespace NeighborGoodAPI
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
-
+            
             app.UseHttpsRedirection();
 
             app.UseCors(corsPolicyName);
