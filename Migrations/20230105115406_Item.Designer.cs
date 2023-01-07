@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NeighborGoodAPI.Models;
 
@@ -11,9 +12,10 @@ using NeighborGoodAPI.Models;
 namespace NeighborGoodAPI.Migrations
 {
     [DbContext(typeof(NGDbContext))]
-    partial class NGDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230105115406_Item")]
+    partial class Item
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -94,9 +96,6 @@ namespace NeighborGoodAPI.Migrations
 
                     b.Property<string>("ImageUrl")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("ItemAdded")
-                        .HasColumnType("datetime2");
 
                     b.Property<string>("Name")
                         .IsRequired()
