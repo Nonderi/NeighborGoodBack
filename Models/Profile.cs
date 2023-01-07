@@ -14,19 +14,14 @@ namespace NeighborGoodAPI.Models
         [Required]
         public string FirstName { get; set; } = null!;
         [Required]
-
         public string LastName { get; set; } = null!;
         [Required]
-
         public string Phone { get; set; } = null!;
         [Required]
-        public Address Address { get; set; }
+        public Address Address { get; set; } = null!;
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
         public ICollection<Item> Items { get; set; } = new List<Item>();
-        //public double? Rating { get; set; }
-        //public ICollection<Comment> Comments { get; set; } = new List<Comment>();
-        //[Precision(8, 6)]
-        //public decimal Longitude { get; set; }
-        //[Precision(8, 6)]
-        //public decimal Latitude { get; set; }
+
     }
 }

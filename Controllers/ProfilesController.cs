@@ -5,7 +5,13 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using NeighborGoodAPI.Models;
+using Service;
+using System.IO;
+using System.Reflection.Emit;
+using Service.Models;
+using System.Text.Json;
 
 namespace NeighborGoodAPI.Controllers
 {
@@ -14,10 +20,11 @@ namespace NeighborGoodAPI.Controllers
     public class ProfilesController : ControllerBase
     {
         private readonly NGDbContext _context;
-
-        public ProfilesController(NGDbContext context)
+        private readonly IConfiguration _configuration;
+        public ProfilesController(NGDbContext context, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
         }
 
         // GET: api/Profiles
@@ -30,14 +37,14 @@ namespace NeighborGoodAPI.Controllers
         [HttpGet("userByAuthId/{userId}")]
         public async Task<Profile?> GetProfileByAuthId(string userId)
         {
-            return  await _context.Profiles.Include(p => p.Items).SingleOrDefaultAsync(p => p.Auth0Id.Equals(userId));
+            return await _context.Profiles.Include(p => p.Items).SingleOrDefaultAsync(p => p.Auth0Id.Equals(userId));
         }
 
         // GET: api/Profiles/<userId>
         [HttpGet("{id}")]
         public async Task<ActionResult<Profile?>> GetProfile(int id)
         {
-            var profile=  await _context.Profiles.Include(p => p.Items).SingleOrDefaultAsync(p => p.Id == id);
+            var profile = await _context.Profiles.Include(p => p.Items).SingleOrDefaultAsync(p => p.Id == id);
 
             if (profile == null)
             {
@@ -83,12 +90,30 @@ namespace NeighborGoodAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<Profile>> PostProfile(Profile profile)
         {
+            string street = profile.Address.Street;
+            string city = profile.Address.City;
+            string zipCode = profile.Address.ZipCode;
+
             Address address = new Address()
             {
-                Street = profile.Address.Street,
-                City = profile.Address.City,
-                ZipCode = profile.Address.ZipCode,
+                Street = street,
+                City = city,
+                ZipCode = zipCode
             };
+
+            LocationService locService = new(_configuration.GetValue<string>("GoogleMapsApiKey"));
+            LocationObject? locObj = await locService.GetLocationObject(street, city, zipCode);
+
+            if (locObj == null)
+            {
+                return NotFound("Paikkatietojen haku epäonnistui");
+            }
+            System.Diagnostics.Debug.WriteLine(JsonSerializer.Serialize(locObj));
+
+            if (locObj.status != "OK")
+            {
+                return NotFound("Osoitetta ei löytynyt");
+            }
 
             Profile newProfile = new()
             {
@@ -96,9 +121,11 @@ namespace NeighborGoodAPI.Controllers
                 FirstName = profile.FirstName,
                 LastName = profile.LastName,
                 Phone = profile.Phone,
-                Address = address 
+                Address = address,
+                Latitude = locObj.results[0].geometry.location.lat,
+                Longitude = locObj.results[0].geometry.location.lng
             };
-            
+
             _context.Profiles.Add(newProfile);
             await _context.SaveChangesAsync();
             return CreatedAtAction("GetProfile", new { id = newProfile.Id }, newProfile);
