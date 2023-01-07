@@ -30,14 +30,14 @@ namespace NeighborGoodAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Item>>> GetItems()
         {
-            return await _context.Items.Include(i => i.Owner).ToListAsync();
+            return await _context.Items.Include(i => i.Owner).ThenInclude(p => p.Address).ToListAsync();
         }
 
         // GET: api/items: search
         [HttpGet("/searchByName/{name}")]
         public async Task<ActionResult<List<Item>>> GetItemByName(string name)
         {
-            return await _context.Items.Include(i => i.Category).Include(t => t.Owner)
+            return await _context.Items.Include(i => i.Category).Include(t => t.Owner).ThenInclude(p => p.Address)
                 .Where(t => t.Name.Contains(name)).ToListAsync();
         }
 
@@ -69,11 +69,13 @@ namespace NeighborGoodAPI.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Item>> GetItem(int id)
         {
-            var item = await _context.Items.FindAsync(id);
+            var item = await _context.Items.Include(i => i.Owner)
+                        .ThenInclude(p => p.Address)
+                        .SingleOrDefaultAsync(i => i.Id == id);
 
             if (item == null)
             {
-                return NotFound();
+                return NotFound($"Tuotetta ei löynyt id:llä {id}");
             }
 
             return item;
@@ -179,13 +181,14 @@ namespace NeighborGoodAPI.Controllers
 
         private bool IsImage(IFormFile file)
         {
-            // image/png, image/gif, image/jpeg
-            if (file.ContentType != "image/png" && file.ContentType != "image/gif" && file.ContentType != "image/jpeg")
+            string[] allowedContentTypes = new[] { "image/png", "image/gif", "image/jpeg"};
+            string[] allowedExtensions = new[] { ".png", ".jfif", ".pjpeg", ".jpeg", ".pjp", ".jpg" };
+
+            if (!allowedContentTypes.Contains(file.ContentType))
             {
                 return false;
             }
             string fileExtension = Path.GetExtension(file.FileName);
-            string[] allowedExtensions = new[] { ".png", ".jfif", ".pjpeg", ".jpeg", ".pjp", ".jpg" };
             if (!allowedExtensions.Contains(fileExtension))
             {
                 return false;
@@ -227,7 +230,6 @@ namespace NeighborGoodAPI.Controllers
                 System.Diagnostics.Debug.WriteLine(ex.Message);
                 return null;
             }
-            
         }
     }
 }
