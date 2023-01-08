@@ -32,6 +32,13 @@ namespace NeighborGoodAPI.Controllers
         {
             return await _context.Items.Include(i => i.Owner).ThenInclude(p => p.Address).ToListAsync();
         }
+        
+        // GET: get user's items
+        [HttpGet("user/{userId}")]
+        public async Task<ActionResult<IEnumerable<Item>>> GetProfileByAuthId(int userId)
+        {
+            return await _context.Items.Where(p => userId == p.Owner.Id).ToListAsync();
+        }
 
         // GET: api/items: search
         [HttpGet("/searchByName/{name}")]
@@ -134,6 +141,10 @@ namespace NeighborGoodAPI.Controllers
             var itemName = formData["itemName"].FirstOrDefault();
             var description = formData["description"].FirstOrDefault();
             var auth0Id = formData["userId"].FirstOrDefault();
+            var borrowTime = formData["borrowTime"].FirstOrDefault();
+            var addInfo = formData["addInfo"].FirstOrDefault();
+            var category = formData["category"].FirstOrDefault();
+
             if (itemName == null)
             {
                 return BadRequest("Item name missing");
@@ -149,12 +160,18 @@ namespace NeighborGoodAPI.Controllers
                 return NotFound($"Cannot find user with user_id: {auth0Id}");
             }
 
+            var itemCategory = await _context.ItemCategories.SingleOrDefaultAsync(c => c.Name == category);
+
             Item item = new()
             {
                 Name = itemName,
                 Owner = owner,
                 Description = description,
-                ImageUrl = fileUrl
+                ImageUrl = fileUrl,
+                BorrowTime = borrowTime,
+                AddInfo = addInfo,
+                Category = itemCategory,
+                ItemAdded = DateTime.Now,
             };
 
             _context.Items.Add(item);
