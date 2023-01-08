@@ -44,7 +44,9 @@ namespace NeighborGoodAPI.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Profile?>> GetProfile(int id)
         {
-            var profile = await _context.Profiles.Include(p => p.Items).SingleOrDefaultAsync(p => p.Id == id);
+            var profile = await _context.Profiles.Include(p => p.Items)
+                .Include(p => p.Address)
+                .SingleOrDefaultAsync(p => p.Id == id);
 
             if (profile == null)
             {
