@@ -189,7 +189,7 @@ namespace NeighborGoodAPI.Controllers
             {
                 return NotFound();
             }
-
+            await DeleteImageFromAzureAsync(item.ImageUrl);
             _context.Items.Remove(item);
             await _context.SaveChangesAsync();
 
@@ -247,6 +247,15 @@ namespace NeighborGoodAPI.Controllers
                 System.Diagnostics.Debug.WriteLine(ex.Message);
                 return null;
             }
+        }
+
+        private async Task DeleteImageFromAzureAsync(string imageUrl)
+        {
+            string blobName = imageUrl.Split('/').Last();
+            System.Diagnostics.Debug.WriteLine($"{blobName}");
+            BlobServiceClient serviceClient = new BlobServiceClient(_configuration.GetValue<string>("BlobConnectionString"));
+            BlobContainerClient containerClient = serviceClient.GetBlobContainerClient(_configuration.GetValue<string>("BlobContainerName"));
+            await containerClient.GetBlobClient(blobName).DeleteAsync(snapshotsOption: DeleteSnapshotsOption.IncludeSnapshots);
         }
     }
 }
