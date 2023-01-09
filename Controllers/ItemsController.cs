@@ -76,7 +76,8 @@ namespace NeighborGoodAPI.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Item>> GetItem(int id)
         {
-            var item = await _context.Items.Include(i => i.Owner)
+            var item = await _context.Items.Include(i => i.Category)
+                        .Include(i => i.Owner)
                         .ThenInclude(p => p.Address)
                         .SingleOrDefaultAsync(i => i.Id == id);
 
