@@ -12,6 +12,7 @@ using System.IO;
 using System.Reflection.Emit;
 using Service.Models;
 using System.Text.Json;
+using Microsoft.AspNetCore.Routing;
 
 namespace NeighborGoodAPI.Controllers
 {
@@ -60,34 +61,44 @@ namespace NeighborGoodAPI.Controllers
         // PUT: api/Profiles/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutProfile(int id, Profile profile)
+        public async Task<ActionResult<Profile>> UpdateProfile(int id, Profile profile)
         {
-            if (id != profile.Id)
-            {
-                return BadRequest();
-            }
+          
+            var dbProfile = _context.Profiles.Include(p => p.Address)
+            .SingleOrDefault(p => p.Id == id);
+            if (dbProfile == null) return BadRequest("Profile not found");
 
-            _context.Entry(profile).State = EntityState.Modified;
+            dbProfile.Auth0Id = profile.Auth0Id;
+            dbProfile.Id = id;
+            dbProfile.Email = profile.Email;
+            dbProfile.Phone = profile.Phone;
+            dbProfile.Address = new Address()
+            {
+                Street = profile.Address.Street,
+                City = profile.Address.City,
+                ZipCode = profile.Address.ZipCode,
+            };
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ProfileExists(id))
-                {
-                    return NotFound();
+                try
+                {              
+                    await _context.SaveChangesAsync();
                 }
-                else
+                catch (DbUpdateConcurrencyException)
                 {
-                    throw;
+                    if (!ProfileExists(id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
                 }
-            }
+                Console.WriteLine("profiili päivitetty");
+                return NoContent();  
 
-            return NoContent();
         }
-
+         
         // POST: api/Profiles
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
@@ -144,7 +155,7 @@ namespace NeighborGoodAPI.Controllers
             var profile = await _context.Profiles.FindAsync(id);
             if (profile == null)
             {
-                return NotFound();
+                return NotFound("Profile not found");
             }
 
             _context.Profiles.Remove(profile);
