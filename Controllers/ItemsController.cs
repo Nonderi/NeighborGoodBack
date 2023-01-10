@@ -30,9 +30,9 @@ namespace NeighborGoodAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Item>>> GetItems()
         {
-            return await _context.Items.Include(i=>i.Category).Include(i => i.Owner).ThenInclude(p => p.Address).ToListAsync();
+            return await _context.Items.Include(i => i.Category).Include(i => i.Owner).ThenInclude(p => p.Address).ToListAsync();
         }
-        
+
         // GET: get user's items
         [HttpGet("user/{userId}")]
         public async Task<ActionResult<IEnumerable<Item>>> GetProfileByAuthId(int userId)
@@ -92,14 +92,41 @@ namespace NeighborGoodAPI.Controllers
         // PUT: api/Items/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutItem(int id, Item item)
+        public async Task<IActionResult> PutItem(int id, IFormCollection formData)
         {
-            if (id != item.Id)
+            var item = await _context.Items.FindAsync(id);
+            if (item == null)
             {
-                return BadRequest();
+                return NotFound($"Ei tuotetta id:llä {id}");
+            }
+            ItemCategory? category = await _context.ItemCategories.SingleOrDefaultAsync(i => i.Name.Equals(formData["category"].First()));
+            if (category == null)
+            {
+                return NotFound("Tuote kategoriaa ei löytynyt");
             }
 
-            _context.Entry(item).State = EntityState.Modified;
+            var file = formData.Files.FirstOrDefault();
+            string? newFileName = null;
+            string? newFileUrl = null;
+            if (file != null && IsImage(file))
+            {
+                newFileName = $"{Guid.NewGuid()}_{file.FileName}";
+                newFileUrl = await UploadImageToAzureAsync(file, newFileName);
+                if (newFileUrl == null)
+                {
+                    return StatusCode(StatusCodes.Status500InternalServerError,
+                        new { message = "Failed to upload image to Azure :(" });
+                }
+                await DeleteImageFromAzureAsync(item!.ImageUrl);
+                item.ImageUrl = newFileUrl;
+            }
+
+
+            item.Name = formData["itemName"].First();
+            item.Description = formData["description"].FirstOrDefault();
+            item.BorrowTime = formData["borrowTime"].FirstOrDefault();
+            item.AddInfo = formData["addInfo"].FirstOrDefault();
+            item.Category = category;
 
             try
             {
@@ -150,7 +177,7 @@ namespace NeighborGoodAPI.Controllers
             {
                 return BadRequest("Item name missing");
             }
-            if(auth0Id == null)
+            if (auth0Id == null)
             {
                 return BadRequest("User_id missing");
 
@@ -199,7 +226,7 @@ namespace NeighborGoodAPI.Controllers
 
         private bool IsImage(IFormFile file)
         {
-            string[] allowedContentTypes = new[] { "image/png", "image/gif", "image/jpeg"};
+            string[] allowedContentTypes = new[] { "image/png", "image/gif", "image/jpeg" };
             string[] allowedExtensions = new[] { ".png", ".jfif", ".pjpeg", ".jpeg", ".pjp", ".jpg" };
 
             if (!allowedContentTypes.Contains(file.ContentType))

@@ -18,7 +18,8 @@ namespace NeighborGoodAPI
                                   policy =>
                                   {
                                       policy.WithOrigins(builder.Configuration.GetValue<string>("Front"))
-                                      .AllowAnyHeader();
+                                      .AllowAnyHeader()
+                                      .AllowAnyMethod();
                                   });
             });
             //builder.Services.AddControllers();
