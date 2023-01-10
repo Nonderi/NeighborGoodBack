@@ -30,7 +30,8 @@ namespace NeighborGoodAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Item>>> GetItems()
         {
-            return await _context.Items.Include(i => i.Category).Include(i => i.Owner).ThenInclude(p => p.Address).ToListAsync();
+            return await _context.Items.Include(i=>i.Category).Include(i => i.Owner).ThenInclude(p => p.Address)
+                .OrderByDescending(i =>i.ItemAdded).ToListAsync();
         }
 
         // GET: get user's items
