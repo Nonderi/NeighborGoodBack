@@ -124,6 +124,8 @@ namespace NeighborGoodAPI.Controllers
                 LastName = profile.LastName,
                 Phone = profile.Phone,
                 Address = address,
+                Email = profile.Email,
+                ImageUrl = profile.ImageUrl,
                 Latitude = locObj.results[0].geometry.location.lat,
                 Longitude = locObj.results[0].geometry.location.lng
             };

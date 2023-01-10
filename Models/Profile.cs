@@ -19,6 +19,8 @@ namespace NeighborGoodAPI.Models
         public string Phone { get; set; } = null!;
         [Required]
         public Address Address { get; set; } = null!;
+        public string ImageUrl { get; set; }
+        public string Email { get; set; }
         public double Latitude { get; set; }
         public double Longitude { get; set; }
         public ICollection<Item> Items { get; set; } = new List<Item>();
