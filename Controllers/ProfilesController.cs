@@ -37,7 +37,8 @@ namespace NeighborGoodAPI.Controllers
         [HttpGet("userByAuthId/{userId}")]
         public async Task<Profile?> GetProfileByAuthId(string userId)
         {
-            return await _context.Profiles.Include(p => p.Items.OrderByDescending(i => i.ItemAdded)).SingleOrDefaultAsync(p => p.Auth0Id.Equals(userId));
+            return await _context.Profiles.Include(p => p.Items.OrderByDescending(i => i.ItemAdded))
+                .Include(p => p.Address).SingleOrDefaultAsync(p => p.Auth0Id.Equals(userId));
         }
 
         // GET: api/Profiles/<userId>
