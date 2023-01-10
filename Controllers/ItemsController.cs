@@ -38,7 +38,8 @@ namespace NeighborGoodAPI.Controllers
         [HttpGet("user/{userId}")]
         public async Task<ActionResult<IEnumerable<Item>>> GetProfileByAuthId(int userId)
         {
-            return await _context.Items.Where(p => userId == p.Owner.Id).ToListAsync();
+            return await _context.Items.Where(p => userId == p.Owner.Id)
+                .OrderByDescending(i => i.ItemAdded ).ToListAsync();
         }
 
         // GET: api/items: search
