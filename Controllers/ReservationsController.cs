@@ -77,13 +77,16 @@ namespace NeighborGoodAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<Reservation>> PostReservation(Reservation reservation)
         {
-            System.Diagnostics.Debug.WriteLine(JsonSerializer.Serialize(reservation));
-
             var item = await _context.Items.FindAsync(reservation.Item.Id);
             if(item == null)
             {
                 return NotFound("Tuotetta ei löytynyt, varauksen teko epäonnistui");
             }
+            if(_context.Reservations.Any(r => r.Item.Id == reservation.Item.Id && r.ReservationDate == reservation.ReservationDate))
+            {
+                return BadRequest("Päivälle on jo varaus");
+            }
+
             var reserver = await _context.Profiles.FindAsync(reservation.Reserver.Id);
             if(reserver == null) {
                 return NotFound("Käyttäjää ei löytynyt, varauksen teko epäonnistui");
