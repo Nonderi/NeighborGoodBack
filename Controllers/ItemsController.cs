@@ -220,9 +220,17 @@ namespace NeighborGoodAPI.Controllers
             {
                 return NotFound();
             }
-            await DeleteImageFromAzureAsync(item.ImageUrl);
+            var reservations = await _context.Reservations.Where(r => r.Item.Id == id).ToListAsync();
+
+            foreach(var reservation in reservations)
+            {
+                _context.Reservations.Remove(reservation);
+            }
+
+            
             _context.Items.Remove(item);
             await _context.SaveChangesAsync();
+            await DeleteImageFromAzureAsync(item.ImageUrl);
 
             return NoContent();
         }
