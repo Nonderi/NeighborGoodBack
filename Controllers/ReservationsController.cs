@@ -28,10 +28,41 @@ namespace NeighborGoodAPI.Controllers
             return await _context.Reservations.ToListAsync();
         }
 
+        // GET: api/Reservations/{id}
         [HttpGet("{id}")]
         public async Task<ActionResult<Reservation>> GetReservation(int id)
         {
             return await _context.Reservations.Include(r => r.Reserver).Include(r => r.Item).SingleOrDefaultAsync(r => r.Id == id);
+        }
+
+        // GET: api/Reservations/ItemsReservedByUser/{userId}
+        [HttpGet("ItemsReservedByUser/{userId}")]
+        public async Task<ActionResult<List<Reservation>?>> ItemsReservedByUser(string userId)
+        {
+            System.Diagnostics.Debug.WriteLine(DateTime.Now);
+            return await _context.Reservations.Where(r => r.Reserver.Auth0Id == userId && r.ReservationDate >= DateTime.Now)
+                                                .Include(r => r.Item)
+                                                .ThenInclude(i => i.Owner)
+                                                .ThenInclude(p => p.Address)
+                                                .OrderBy(r => r.Item.Id)
+                                                .OrderBy(r => r.ReservationDate)
+                                                .ToListAsync()
+                                                ;
+        }
+
+        // GET: api/ItemsReservedFromUser/{userId}
+        [HttpGet("ItemsReservedFromUser/{userId}")]
+        public async Task<ActionResult<List<Reservation>?>> ItemsReservedFromUser(string userId)
+        {
+            return await _context.Reservations.Where(r => r.Item.Owner.Auth0Id == userId)
+                                                .Include(r => r.Reserver)
+                                                .Include(r => r.Item)
+                                                .ThenInclude(i => i.Owner)
+                                                .ThenInclude(p => p.Address)
+                                                .OrderBy(r => r.Item.Id)
+                                                .OrderBy(r => r.ReservationDate)
+                                                .ToListAsync();
+
         }
 
         // GET: api/Reservations/5
