@@ -12,6 +12,7 @@ using System.IO;
 using System.Reflection.Emit;
 using Service.Models;
 using System.Text.Json;
+using Microsoft.AspNetCore.Routing;
 
 namespace NeighborGoodAPI.Controllers
 {
@@ -37,14 +38,15 @@ namespace NeighborGoodAPI.Controllers
         [HttpGet("userByAuthId/{userId}")]
         public async Task<Profile?> GetProfileByAuthId(string userId)
         {
-            return await _context.Profiles.Include(p => p.Items).Include(p => p.Address).SingleOrDefaultAsync(p => p.Auth0Id.Equals(userId));
+            return await _context.Profiles.Include(p => p.Items.OrderByDescending(i => i.ItemAdded))
+                .Include(p => p.Address).SingleOrDefaultAsync(p => p.Auth0Id.Equals(userId));
         }
 
         // GET: api/Profiles/<userId>
         [HttpGet("{id}")]
         public async Task<ActionResult<Profile?>> GetProfile(int id)
         {
-            var profile = await _context.Profiles.Include(p => p.Items)
+            var profile = await _context.Profiles.Include(p => p.Items.OrderByDescending(i => i.ItemAdded))
                 .Include(p => p.Address)
                 .SingleOrDefaultAsync(p => p.Id == id);
 
@@ -59,34 +61,41 @@ namespace NeighborGoodAPI.Controllers
         // PUT: api/Profiles/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutProfile(int id, Profile profile)
+        public async Task<ActionResult<Profile>> UpdateProfile(int id, IFormCollection formData)
         {
-            if (id != profile.Id)
-            {
-                return BadRequest();
-            }
+          
+            var dbProfile = _context.Profiles.Include(p => p.Address)
+            .SingleOrDefault(p => p.Id == id);
+            if (dbProfile == null) return BadRequest("Profile not found");
 
-            _context.Entry(profile).State = EntityState.Modified;
+            dbProfile.FirstName = formData["firstName"].FirstOrDefault(); 
+            dbProfile.LastName = formData["lastName"].FirstOrDefault();
+            dbProfile.Email = formData["email"].FirstOrDefault();
+            dbProfile.Phone = formData["phone"].FirstOrDefault(); ;
+            dbProfile.Address.Street = formData["street"].FirstOrDefault();
+            dbProfile.Address.ZipCode = formData["zipCode"].FirstOrDefault();
+            dbProfile.Address.City = formData["city"].FirstOrDefault();
+
 
             try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ProfileExists(id))
-                {
-                    return NotFound();
+                {              
+                    await _context.SaveChangesAsync();
                 }
-                else
+                catch (DbUpdateConcurrencyException)
                 {
-                    throw;
+                    if (!ProfileExists(id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
                 }
-            }
+                return NoContent();  
 
-            return NoContent();
         }
-
+         
         // POST: api/Profiles
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
@@ -143,7 +152,7 @@ namespace NeighborGoodAPI.Controllers
             var profile = await _context.Profiles.FindAsync(id);
             if (profile == null)
             {
-                return NotFound();
+                return NotFound("Profile not found");
             }
 
             _context.Profiles.Remove(profile);
