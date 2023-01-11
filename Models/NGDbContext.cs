@@ -11,6 +11,7 @@ namespace NeighborGoodAPI.Models
         public DbSet<Comment> Comments { get; set; } = null!;
         public DbSet<ItemCategory> ItemCategories { get; set; } = null!;
         public DbSet<Address> Addresses { get; set; } = null!;
+        public DbSet<Reservation> Reservations { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

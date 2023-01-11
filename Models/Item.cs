@@ -5,8 +5,7 @@ namespace NeighborGoodAPI.Models
     public class Item
     {
         public int Id { get; set; }
-        [Required]
-        public Profile Owner { get; set; } = null!;
+        public Profile? Owner { get; set; }
         [Required]
         public string Name { get; set; } = null!;
         public string? Description { get; set; }

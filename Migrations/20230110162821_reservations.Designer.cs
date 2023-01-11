@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NeighborGoodAPI.Models;
 
@@ -11,9 +12,11 @@ using NeighborGoodAPI.Models;
 namespace NeighborGoodAPI.Migrations
 {
     [DbContext(typeof(NGDbContext))]
-    partial class NGDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230110162821_reservations")]
+    partial class reservations
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -102,7 +105,7 @@ namespace NeighborGoodAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("OwnerId")
+                    b.Property<int>("OwnerId")
                         .HasColumnType("int");
 
                     b.Property<double?>("Rating")
@@ -230,7 +233,9 @@ namespace NeighborGoodAPI.Migrations
 
                     b.HasOne("NeighborGoodAPI.Models.Profile", "Owner")
                         .WithMany("Items")
-                        .HasForeignKey("OwnerId");
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Category");
 
