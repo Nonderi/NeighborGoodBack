@@ -61,25 +61,23 @@ namespace NeighborGoodAPI.Controllers
         // PUT: api/Profiles/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<ActionResult<Profile>> UpdateProfile(int id, Profile profile)
+        public async Task<ActionResult<Profile>> UpdateProfile(int id, IFormCollection formData)
         {
           
             var dbProfile = _context.Profiles.Include(p => p.Address)
             .SingleOrDefault(p => p.Id == id);
             if (dbProfile == null) return BadRequest("Profile not found");
 
-            dbProfile.Auth0Id = profile.Auth0Id;
-            dbProfile.Id = id;
-            dbProfile.Email = profile.Email;
-            dbProfile.Phone = profile.Phone;
-            dbProfile.Address = new Address()
-            {
-                Street = profile.Address.Street,
-                City = profile.Address.City,
-                ZipCode = profile.Address.ZipCode,
-            };
+            dbProfile.FirstName = formData["firstName"].FirstOrDefault(); 
+            dbProfile.LastName = formData["lastName"].FirstOrDefault();
+            dbProfile.Email = formData["email"].FirstOrDefault();
+            dbProfile.Phone = formData["phone"].FirstOrDefault(); ;
+            dbProfile.Address.Street = formData["street"].FirstOrDefault();
+            dbProfile.Address.ZipCode = formData["zipCode"].FirstOrDefault();
+            dbProfile.Address.City = formData["city"].FirstOrDefault();
 
-                try
+
+            try
                 {              
                     await _context.SaveChangesAsync();
                 }
@@ -94,7 +92,6 @@ namespace NeighborGoodAPI.Controllers
                         throw;
                     }
                 }
-                Console.WriteLine("profiili päivitetty");
                 return NoContent();  
 
         }
