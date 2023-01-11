@@ -10,6 +10,7 @@ using NeighborGoodAPI.Models;
 using Azure.Storage.Blobs.Models;
 using Azure.Storage.Blobs;
 using Azure;
+using Microsoft.SqlServer.Server;
 
 namespace NeighborGoodAPI.Controllers
 {
@@ -94,14 +95,41 @@ namespace NeighborGoodAPI.Controllers
         // PUT: api/Items/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutItem(int id, Item item)
+        public async Task<IActionResult> PutItem(int id, IFormCollection formData)
         {
-            if (id != item.Id)
+            var item = await _context.Items.FindAsync(id);
+            if (item == null)
             {
-                return BadRequest();
+                return NotFound($"Ei tuotetta id:llä {id}");
+            }
+            ItemCategory? category = await _context.ItemCategories.SingleOrDefaultAsync(i => i.Name.Equals(formData["category"].First()));
+            if (category == null)
+            {
+                return NotFound("Tuote kategoriaa ei löytynyt");
             }
 
-            _context.Entry(item).State = EntityState.Modified;
+            var file = formData.Files.FirstOrDefault();
+            string? newFileName = null;
+            string? newFileUrl = null;
+            if (file != null && IsImage(file))
+            {
+                newFileName = $"{Guid.NewGuid()}_{file.FileName}";
+                newFileUrl = await UploadImageToAzureAsync(file, newFileName);
+                if (newFileUrl == null)
+                {
+                    return StatusCode(StatusCodes.Status500InternalServerError,
+                        new { message = "Failed to upload image to Azure :(" });
+                }
+                await DeleteImageFromAzureAsync(item!.ImageUrl);
+                item.ImageUrl = newFileUrl;
+            }
+
+
+            item.Name = formData["itemName"].First();
+            item.Description = formData["description"].FirstOrDefault();
+            item.BorrowTime = formData["borrowTime"].FirstOrDefault();
+            item.AddInfo = formData["addInfo"].FirstOrDefault();
+            item.Category = category;
 
             try
             {
