@@ -68,14 +68,25 @@ namespace NeighborGoodAPI.Controllers
             .SingleOrDefault(p => p.Id == id);
             if (dbProfile == null) return BadRequest("Profile not found");
 
+            string street = formData["street"].FirstOrDefault();
+            string zipCode = formData["zipCode"].FirstOrDefault();
+            string city = formData["city"].FirstOrDefault();
             dbProfile.FirstName = formData["firstName"].FirstOrDefault(); 
             dbProfile.LastName = formData["lastName"].FirstOrDefault();
             dbProfile.Email = formData["email"].FirstOrDefault();
             dbProfile.Phone = formData["phone"].FirstOrDefault(); ;
-            dbProfile.Address.Street = formData["street"].FirstOrDefault();
-            dbProfile.Address.ZipCode = formData["zipCode"].FirstOrDefault();
-            dbProfile.Address.City = formData["city"].FirstOrDefault();
+            dbProfile.Address.Street = street;
+            dbProfile.Address.ZipCode = zipCode;
+            dbProfile.Address.City = city;
 
+            LocationService locService = new(_configuration.GetValue<string>("GoogleMapsApiKey"));
+            LocationObject? locObj = await locService.GetLocationObject(street, city, zipCode);
+            if(locObj != null)
+            {
+                dbProfile.Latitude = locObj.results[0].geometry.location.lat;
+                dbProfile.Longitude = locObj.results[0].geometry.location.lng;
+
+            }
 
             try
                 {              
@@ -149,13 +160,29 @@ namespace NeighborGoodAPI.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProfile(int id)
         {
-            var profile = await _context.Profiles.FindAsync(id);
+            var profile = await _context.Profiles.Include(p => p.Address)
+                                                    .SingleOrDefaultAsync(p => p.Id == id);
             if (profile == null)
             {
-                return NotFound("Profile not found");
+                return NotFound("Profiilia ei löytynyt");
             }
-
+            var address = await _context.Addresses.SingleOrDefaultAsync(a => a.Id == profile.Address.Id);
+            if(address == null)
+            {
+                return NotFound("Käyttäjän osoitetta haku epäonnistui");
+            }
+            var items = await _context.Items.Where(i => i.Owner.Id == profile.Id).ToListAsync();
+            if(items == null)
+            {
+                return NotFound("Tuotteiden haku epäonnistui");
+            }
+            var itemIds = items.Select(i => i.Id).ToList();
+            var reservations = await _context.Reservations.Where(r => itemIds.Contains(r.Item.Id) || r.Reserver.Id == profile.Id).ToListAsync();
+            _context.Reservations.RemoveRange(reservations);
+            _context.Items.RemoveRange(items);
             _context.Profiles.Remove(profile);
+            _context.Addresses.Remove(address); 
+            
             await _context.SaveChangesAsync();
 
             return NoContent();
