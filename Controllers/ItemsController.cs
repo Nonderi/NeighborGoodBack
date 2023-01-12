@@ -44,7 +44,7 @@ namespace NeighborGoodAPI.Controllers
         }
 
         // GET: api/items: search
-        [HttpGet("/searchByName/{name}")]
+        [HttpGet("searchByName/{name}")]
         public async Task<ActionResult<List<Item>>> GetItemByName(string name)
         {
             return await _context.Items.Include(i => i.Category).Include(t => t.Owner).ThenInclude(p => p.Address)
@@ -52,7 +52,7 @@ namespace NeighborGoodAPI.Controllers
         }
 
         // GET: api/items: search
-        [HttpGet("/searchExtended")]
+        [HttpGet("searchExtended")]
         public async Task<ActionResult<List<Item>>> GetItemExtended(string? name, string? city, string? category)
         {
             return await _context.Items.Include(i => i.Category).Include(t => t.Owner).ThenInclude(p => p.Address)
