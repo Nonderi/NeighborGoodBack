@@ -65,7 +65,7 @@ namespace NeighborGoodAPI.Controllers
         [HttpGet("Cities")]
         public async Task<List<string>> GetCities()
         {
-            return await _context.Addresses.Select(a => a.City).ToListAsync();
+            return await _context.Addresses.Select(a => a.City).Distinct().ToListAsync();
         }
 
         //GET: api/Items/Categories
